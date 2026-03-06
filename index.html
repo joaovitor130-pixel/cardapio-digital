@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cardápio Hamburgueria Burger</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fffdf5;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #ffcc00;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    header img {
+      max-width: 100px;
+      display: block;
+      margin: 0 auto 0.5rem;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: bold;
+      /* Adicionado para a fonte pincelada */
+      font-family: 'Brush Script MT', cursive; /* Ou outra fonte pincelada de sua preferência */
+    }
+    .carousel-container {
+      position: relative;
+      width: 95%;
+      max-width: 700px;
+      margin: 1rem auto 0.5rem;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      cursor: pointer;
+      user-select: none;
+    }
+    .carousel-slide {
+      display: flex;
+      transition: transform 0.5s ease-in-out;
+    }
+    .carousel-slide img {
+      width: 100%;
+      height: auto;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .carousel-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(255, 204, 0, 0.8);
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 20px;
+      line-height: 35px;
+      text-align: center;
+      color: #fff;
+      user-select: none;
+      transition: background-color 0.3s;
+      z-index: 10;
+    }
+    .carousel-arrow:hover {
+      background-color: #e0b800;
+    }
+    .arrow-left {
+      left: 10px;
+    }
+    .arrow-right {
+      right: 10px;
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      gap: 0.5rem;
+      padding: 0 1rem;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar {
+      display: none;
+    }
+    .tabs button {
+      background: #ffcc00;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+      color: black;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .tabs button.active,
+    .tabs button:hover {
+      background: #e0b800;
+      color: white;
+    }
+    .container {
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .item {
+      background: #f9f9f9;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      opacity: 1; /* Default opacity */
+      transition: opacity 0.3s ease;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .item.indisponivel {
+      opacity: 0.5; /* Reduced opacity for unavailable items */
+    }
+
+    .item h3 {
+      margin: 0 0 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+    .item h3 img {
+      width: 80px;
+      height: auto;
+      margin-right: 10px;
+      border-radius: 6px;
+    }
+    .item button {
+      background: #ffcc00;
+      border: none;
+      padding: 0.4rem 1rem;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      color: black;
+      text-transform: uppercase;
+    }
+
+    .item button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+      color: #666;
+    }
+
+    .remove-btn {
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      margin-left: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #carrinho {
+      margin-top: 2rem;
+      background: #fff8c4;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    #total {
+      margin-top: 1rem;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      position: relative; /* Added for positioning the close button */
+    }
+    .modal-content h4 {
+      margin-top: 0;
+    }
+    .modal-content label {
+      display: block;
+      margin: 0.3rem 0;
+      cursor: pointer;
+      user-select: none;
+    }
+    .modal-content input[type="checkbox"] {
+      margin-right: 8px;
+      cursor: pointer;
+    }
+    .modal-content button {
+      margin-top: 1rem;
+      background: #ffcc00;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      color: black;
+    }
+    .modal-content button:hover {
+      background: #e0b800;
+    }
+
+    /* Style for the close button */
+    .close-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      text-align: center;
+      line-height: 25px;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tempo-preparo {
+      font-size: 0.8rem;
+      color: #777;
+      margin-top: 0.3rem;
+    }
+
+    /* Estilos para o modal de confirmação */
+    #confirmacaoModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+
+    #confirmacaoModal .modal-content {
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+      position: relative;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    #confirmacaoModal h3 {
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      color: #333;
+    }
+
+    #confirmacaoModal ul {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 1rem;
+    }
+
+    #confirmacaoModal li {
+      padding: 0.5rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    #confirmacaoModal li:last-child {
+      border-bottom: none;
+    }
+
+    #confirmacaoModal .total {
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-top: 1rem;
+    }
+
+    #confirmacaoModal .botoes {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 2rem;
+    }
+
+    /* Estilos para os botões do modal de confirmação */
+    #confirmacaoModal button {
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      outline: none;
+    }
+
+    #confirmacaoModal button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    #confirmacaoModal button:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    #confirmacaoModal button.cancelar {
+      background-color: #f44336;
+    }
+
+    #confirmacaoModal button.cancelar:hover {
+      background-color: #d32f2f;
+    }
+
+    #confirmacaoModal button[onclick="enviarParaWhatsApp()"] {
+      background-color: #4CAF50;
+    }
+
+    #confirmacaoModal button[onclick="enviarParaWhatsApp()"]:hover {
+      background-color: #388E3C;
+    }
+
+    /* Estilo para o botão de fechar no modal de confirmação */
+    #confirmacaoModal .close-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      text-align: center;
+      line-height: 25px;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Estilos para o botão "Finalizar Pedido" */
+    #finalizarPedido {
+      background: linear-gradient(to right, #4CAF50, #81C784);
+      color: white;
+      padding: 0.5rem 1rem; /* Diminuindo o padding */
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      font-size: 0.9rem; /* Diminuindo o tamanho da fonte */
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      outline: none;
+    }
+
+    #finalizarPedido:hover {
+      background: linear-gradient(to right, #388E3C, #66BB6A);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    #finalizarPedido:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10%);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://img.freepik.com/vetores-premium/modelo-de-logotipo-de-hamburguer_476121-29.jpg" alt="Logo" />
+    <h1>Cardápio Hamburgueria Burger</h1>
+  </header>
+
+  <div class="carousel-container" id="carousel">
+    <button class="carousel-arrow arrow-left" id="prevBtn" aria-label="Anterior">&#10094;</button>
+    <div class="carousel-slide" id="carouselSlide">
+      <img src="https://i.imgur.com/VbmPh1k.jpeg" alt="Promoção 1" onclick="filtrar('combo', event)" tabindex="0" />
+      <img src="https://i.imgur.com/3QffCK7.jpeg" alt="Promoção 2" onclick="filtrar('petisco', event)" tabindex="0" />
+      <img src="https://i.imgur.com/IdI7PiS.jpeg" alt="Promoção 3" onclick="filtrar('bebida', event)" tabindex="0" />
+    </div>
+    <button class="carousel-arrow arrow-right" id="nextBtn" aria-label="Próximo">&#10095;</button>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tablink active" onclick="filtrar('hamburguer', event)" role="tab" aria-selected="true" tabindex="0">HAMBÚRGUERES</button>
+    <button class="tablink" onclick="filtrar('petisco', event)" role="tab" aria-selected="false" tabindex="-1">PETISCOS</button>
+    <button class="tablink" onclick="filtrar('bebida', event)" role="tab" aria-selected="false" tabindex="-1">BEBIDAS</button>
+    <button class="tablink" onclick="filtrar('combo', event)" role="tab" aria-selected="false" tabindex="-1">COMBOS</button>
+  </div>
+
+  <div class="container" id="menu">
+
+    <div class="item hamburguer" data-id="1">
+      <h3><img src="https://alloydeliveryimages.s3.sa-east-1.amazonaws.com/item_images/7290/64cebbbf5e9386fmo7.webp" alt="X-Burguer" /> X-Burguer</h3>
+      <p>Pão, carne de hambúrguer, queijo, alface, tomate, maionese</p>
+      <p><strong>R$ 19,90</strong></p>
+      <button onclick="adicionar('X-Burguer', 19.9)">ADICIONAR</button>
+      <div class="tempo-preparo">Tempo de preparo: 15-20 minutos</div>
+    </div>
+
+    <div class="item hamburguer" data-id="2">
+      <h3><img src="https://static.codepill.com.br/domains/7e4e09e5-31af-44d5-bd1e-428319709832/products/gallery_1a5cc893-622d-4037-8612-1e4663558187.jpg" alt="X-Tudo" /> X-Tudo</h3>
+      <p>Pão, carne de hambúrguer, queijo, presunto, ovo, bacon, alface, tomate, maionese</p>
+      <p><strong>R$ 19,90</strong></p>
+      <button onclick="adicionar('X-Tudo', 19.9)">ADICIONAR</button>
+      <div class="tempo-preparo">Tempo de preparo: 20-25 minutos</div>
+    </div>
+
+    <div class="item hamburguer" data-id="3">
+      <h3><img src="https://embutidosbonatti.ind.br/temp/BIN_57_V9Fb0BwK.jpg" alt="X-Bacon" /> X-Bacon</h3>
+      <p>Pão, carne de hambúrguer, queijo, bacon, maionese</p>
+      <p><strong>R$ 19,90</strong></p>
+      <button onclick="adicionar('X-Bacon', 19.9)">ADICIONAR</button>
+      <div class="tempo-preparo">Tempo de preparo: 15-20 minutos</div>
+    </div>
+
+    <div class="item petisco" data-id="4">
+      <h3><img src="https://applicativa-marketplace-prod.s3.amazonaws.com/como-fazer-batata-frita-1.jpg" alt="Batata Frita" /> Batata Frita P</h3>
+      <p>Porção de batata frita crocante com sal</p>
+      <p><strong>R$ 14,90</strong></p>
+      <button onclick="adicionar('Batata Frita P', 14.9)">ADICIONAR</button>
+      <div class="tempo-preparo">Tempo de preparo: 10-15 minutos</div>
+    </div>
+
+    <div class="item petisco" data-id="5">
+      <h3><img src="https://sabores-new.s3.amazonaws.com/public/2024/11/como_fazer_coxinha_5b80490b71f939.44065329.jpg" alt="Coxinha" /> Coxinhas</h3>
+      <p>Porção com coxinhas de frango temperadas e empanadas</p>
+      <p><strong>R$ 9,90</strong></p>
+      <button onclick="adicionar('Coxinhas', 9.9)">ADICIONAR</button>
+      <div class="tempo-preparo">Tempo de preparo: 15-20 minutos</div>
+    </div>
+
+    <div class="item bebida" data-id="6">
+      <h3><img src="https://viverbem.unimed.coop.br/wp-content/uploads/2024/11/7c9298bb-bf32-4661-8f48-8a32ebb87361.jpeg" alt="Suco de Fruta" /> Suco de Fruta</h3>
+      <p>Suco natural (laranja, abacaxi ou caju)</p>
+      <p><strong>R$ 6,90</strong></p>
+      <button onclick="adicionar('Suco de Fruta', 6.9)">ADICIONAR</button>
+      <div class="tempo-preparo">Tempo de preparo: 5-10 minutos</div>
+    </div>
+
+    <div class="item bebida" data-id="7">
+      <h3><img src="https://i.imgur.com/3ZmNWBU.jpeg" alt="Refrigerante" /> Refrigerante Lata</h3>
+      <p>Lata 350ml de refrigerante (Coca, Guaraná, etc.)</p>
+      <p><strong>R$ 5,00</strong></p>
+      <button onclick="adicionar('Refrigerante Lata', 5.0)">ADICIONAR</button>
+    </div>
+
+    <div class="item combo" data-id="8">
+      <h3><img src="https://i.imgur.com/NCX5UGz.jpeg" alt="Combo" /> Combo X-Tudo + Refrigerante Lata + Batata Frita</h3>
+      <p>Inclui X-Tudo completo, 1 refrigerante lata e porção de batata frita P</p>
+      <p><strong>R$ 29,90</strong></p>
+      <button onclick="adicionar('Combo X-Tudo + Refrigerante Lata + Batata Frita', 29.9)">ADICIONAR</button>
+    </div>
+
+    <div id="carrinho">
+      <h3>Seu Pedido:</h3>
+      <ul id="lista"></ul>
+      <div id="total">Total: R$ 0,00</div>
+
+      <div style="margin-top: 1rem;">
+        <label for="pagamento"><strong>Forma de Pagamento:</strong></label>
+        <select id="pagamento" style="margin-left: 10px; padding: 5px;">
+          <option value="Pix">Pix</option>
+          <option value="Cartão">Cartão</option>
+          <option value="Espécie">Espécie</option>
+        </select>
+      </div>
+
+      <button id="finalizarPedido">Finalizar Pedido</button>
+    </div>
+  </div>
+
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-content">
+      <button class="close-button" onclick="fecharModal()">X</button>
+      <h4 id="modalTitle">Retirar algum ingrediente?</h4>
+      <form id="ingredientesForm"></form>
+      <button onclick="confirmarIngredientes()">NÃO, ADICIONAR</button>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmação -->
+  <div id="confirmacaoModal" class="modal">
+    <div class="modal-content">
+      <button class="close-button" onclick="fecharConfirmacaoModal()">X</button>
+      <h3>Confirme seu pedido:</h3>
+      <ul id="listaConfirmacao"></ul>
+      <div class="total" id="totalConfirmacao">Total: R$ 0,00</div>
+      <div class="botoes">
+        <button class="cancelar" onclick="fecharConfirmacaoModal()">Cancelar</button>
+        <button onclick="enviarParaWhatsApp()">Confirmar e Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const lista = document.getElementById('lista');
+    const whatsapp = document.getElementById('whatsapp');
+    const totalDiv = document.getElementById('total');
+    const pagamentoSelect = document.getElementById('pagamento');
+    const modal = document.getElementById('modal');
+    const ingredientesForm = document.getElementById('ingredientesForm');
+    const finalizarPedidoBtn = document.getElementById('finalizarPedido');
+    const confirmacaoModal = document.getElementById('confirmacaoModal');
+    const listaConfirmacao = document.getElementById('listaConfirmacao');
+    const totalConfirmacao = document.getElementById('totalConfirmacao');
+
+    // Chaves para armazenar dados no localStorage
+    const PEDIDO_KEY = 'pedidoHamburgueria';
+
+    let pedido = [];
+    let formaPagamentoSelecionada = pagamentoSelect.value;
+    let itemTemp = null;
+    let precoTemp = 0;
+
+    // Função para salvar o pedido no localStorage
+    function salvarPedido() {
+      localStorage.setItem(PEDIDO_KEY, JSON.stringify(pedido));
+    }
+
+    // Função para carregar o pedido do localStorage
+    function carregarPedido() {
+      const pedidoSalvo = localStorage.getItem(PEDIDO_KEY);
+      if (pedidoSalvo) {
+        pedido = JSON.parse(pedidoSalvo);
+      }
+    }
+
+    pagamentoSelect.addEventListener('change', () => {
+      formaPagamentoSelecionada = pagamentoSelect.value;
+      atualizarCarrinho();
+    });
+
+    const ingredientesPorItem = {
+      'X-Burguer': ['Carne de Hambúrguer', 'Queijo', 'Alface', 'Tomate', 'Maionese'],
+      'X-Tudo': ['Carne de Hambúrguer', 'Queijo', 'Presunto', 'Ovo', 'Bacon', 'Alface', 'Tomate', 'Maionese'],
+      'X-Bacon': ['Carne de Hambúrguer', 'Queijo', 'Bacon', 'Maionese'],
+    };
+
+    function adicionar(item, preco) {
+      itemTemp = item;
+      precoTemp = preco;
+
+      const ingredientes = ingredientesPorItem[item];
+      if (!ingredientes) {
+        adicionarItemAoPedido({ item, preco, removidos: [] });
+        return;
+      }
+
+      ingredientesForm.innerHTML = '';
+      ingredientes.forEach(ing => {
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = ing;
+        checkbox.id = `ing-${ing}`;
+        const label = document.createElement('label');
+        label.htmlFor = `ing-${ing}`;
+        label.textContent = ing;
+        label.prepend(checkbox);
+        ingredientesForm.appendChild(label);
+      });
+
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+
+      const firstCheckbox = ingredientesForm.querySelector('input[type=checkbox]');
+      if (firstCheckbox) firstCheckbox.focus();
+    }
+
+    function confirmarIngredientes() {
+      const checkboxes = ingredientesForm.querySelectorAll('input[type=checkbox]');
+      const removidos = [];
+      checkboxes.forEach(cb => {
+        if (cb.checked) removidos.push(cb.value);
+      });
+
+      adicionarItemAoPedido({ item: itemTemp, preco: precoTemp, removidos });
+      itemTemp = null;
+      precoTemp = 0;
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    function adicionarItemAoPedido(item) {
+      const itemExistente = pedido.find(p => p.item === item.item && JSON.stringify(p.removidos) === JSON.stringify(item.removidos));
+
+      if (itemExistente) {
+        itemExistente.quantidade = (itemExistente.quantidade || 1) + 1;
+      } else {
+        pedido.push({ ...item, quantidade: 1 });
+      }
+
+      atualizarCarrinho();
+    }
+
+    function remover(index) {
+      pedido.splice(index, 1);
+      atualizarCarrinho();
+    }
+
+    function removerUm(index) {
+      if (pedido[index].quantidade > 1) {
+        pedido[index].quantidade--;
+      } else {
+        remover(index);
+      }
+      atualizarCarrinho();
+    }
+
+    function atualizarCarrinho() {
+      lista.innerHTML = '';
+      let total = 0;
+
+      pedido.forEach((item, index) => {
+        let textoItem = `${item.item} - R$ ${item.preco.toFixed(2)}`;
+        if (item.removidos && item.removidos.length > 0) {
+          textoItem += ` (sem: ${item.removidos.join(', ')})`;
+        }
+
+        const li = document.createElement('li');
+        li.textContent = textoItem;
+
+        if (item.quantidade > 1) {
+          li.textContent += ` (x${item.quantidade})`;
+        }
+
+        const btnRemoverUm = document.createElement('button');
+        btnRemoverUm.textContent = '-';
+        btnRemoverUm.className = 'remove-btn';
+        btnRemoverUm.onclick = () => removerUm(index);
+        li.appendChild(btnRemoverUm);
+
+        const btn = document.createElement('button');
+        btn.textContent = 'X';
+        btn.className = 'remove-btn';
+        btn.onclick = () => remover(index);
+        li.appendChild(btn);
+
+        lista.appendChild(li);
+        total += item.preco * (item.quantidade || 1);
+      });
+
+      totalDiv.textContent = `Total: R$ ${total.toFixed(2)}`;
+      salvarPedido();
+    }
+
+    function filtrar(categoria, event) {
+      if(event) event.preventDefault();
+
+      document.querySelectorAll('.item').forEach(div => {
+        div.style.display = div.classList.contains(categoria) ? 'block' : 'none';
+      });
+
+      document.querySelectorAll('.tablink').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+        btn.tabIndex = -1;
+      });
+
+      // Marca o botão ativo corretamente
+      if(event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+        event.currentTarget.setAttribute('aria-selected', 'true');
+        event.currentTarget.tabIndex = 0;
+        event.currentTarget.focus();
+      }
+    }
+
+    // CARROSSEL
+    const carouselSlide = document.getElementById('carouselSlide');
+    const carouselImages = carouselSlide.querySelectorAll('img');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    let currentIndex = 0;
+    const totalSlides = carouselImages.length;
+
+    function showSlide(index) {
+      if (index < 0) currentIndex = totalSlides - 1;
+      else if (index >= totalSlides) currentIndex = 0;
+      else currentIndex = index;
+
+      carouselSlide.style.transform = `translateX(-${currentIndex * 100}%)`;
+    }
+
+    prevBtn.addEventListener('click', () => showSlide(currentIndex - 1));
+    nextBtn.addEventListener('click', () => showSlide(currentIndex + 1));
+    setInterval(() => showSlide(currentIndex + 1), 4000);
+
+    function fecharModal() {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    // Modal de Confirmação
+    finalizarPedidoBtn.addEventListener('click', () => {
+      if (pedido.length === 0) {
+        alert('Seu carrinho está vazio!');
+        return;
+      }
+
+      listaConfirmacao.innerHTML = '';
+      let total = 0;
+
+      pedido.forEach(item => {
+        let textoItem = `${item.item} - R$ ${item.preco.toFixed(2)}`;
+        if (item.removidos && item.removidos.length > 0) {
+          textoItem += ` (sem: ${item.removidos.join(', ')})`;
+        }
+        if (item.quantidade > 1) {
+          textoItem += ` (x${item.quantidade})`;
+        }
+
+        const li = document.createElement('li');
+        li.textContent = textoItem;
+        listaConfirmacao.appendChild(li);
+        total += item.preco * (item.quantidade || 1);
+      });
+
+      totalConfirmacao.textContent = `Total: R$ ${total.toFixed(2)}`;
+      confirmacaoModal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    });
+
+    function fecharConfirmacaoModal() {
+      confirmacaoModal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    function enviarParaWhatsApp() {
+      let total = 0;
+      pedido.forEach(item => {
+        total += item.preco * (item.quantidade || 1);
+      });
+
+      const texto = pedido.map(p => {
+        let linha = `${p.item} - R$ ${p.preco.toFixed(2)}`;
+        if (p.removidos && p.removidos.length > 0) {
+          linha += ` (sem: ${p.removidos.join(', ')})`;
+        }
+        if (p.quantidade > 1) {
+          linha += ` (x${p.quantidade})`;
+        }
+        return linha;
+      }).join('\n');
+
+      const mensagem = encodeURIComponent(
+        `Olá! Quero fazer o seguinte pedido:\n\n${texto}\n\nTotal: R$ ${total.toFixed(2)}\nForma de pagamento: ${formaPagamentoSelecionada}`
+      );
+
+      const whatsappLink = `https://wa.me/5584991425698?text=${mensagem}`;
+      window.open(whatsappLink, '_blank');
+
+      fecharConfirmacaoModal();
+    }
+
+    // Inicialização
+    carregarPedido();
+    atualizarCarrinho();
+    filtrar('hamburguer');
+  </script>
+</body>
+</html>
